@@ -1,0 +1,22 @@
+<launch>
+
+    <!-- Input Parameters -->
+    <arg name="DATA" />
+
+    <!-- Parser server -->
+    <node name="data_parser" 
+        pkg="data_parser" 
+        type="data_parser_node" 
+        output="screen" > 
+    </node>
+
+    <!-- Interaction_monitor publisher -->
+    <node name="elan_translator" 
+        pkg="elan_translator" 
+        type="elan_translator_present" 
+        output="screen" 
+        args="$(find data_parser)/data/ $(arg DATA)" >
+    </node>
+
+
+</launch>
