@@ -1,0 +1,20 @@
+<launch>
+
+    <!-- Interaction_learner  -->
+    <node name="interaction_monitor" 
+        pkg="interaction_monitor" 
+        type="interaction_monitor_node" 
+        output="screen" > 
+
+        <remap from="last_command" to="ELAN_last_cmd" />
+        <remap from="announce" to="ELAN_announce" />
+        <remap from="gesture" to="ELAN_gesture" />
+        <remap from="heading_adj" to="ELAN_heading_adj" />
+        <remap from="dist_adj" to="ELAN_dist_adj" />
+        <remap from="category" to="ELAN_category" /> 
+        <remap from="trigger" to="ELAN_trigger" />
+    </node>
+
+</launch>
+
+
