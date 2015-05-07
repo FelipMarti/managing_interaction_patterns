@@ -1,9 +1,13 @@
 /**
- *      This node calls the parser ROS-service, once for each input file 
- *      and publishes all the Annotations that appears in time intervals of 500ms
+ *      This node calls the ROS-service parser for each input file 
+ *      and publishes all the Annotations that appear in time intervals of 500ms
  *      
- *      Before publishing those annotations are translated from strings to integers
- *      in order to train or perform inference later in a Bayesian network
+ *      Before publishing those annotations, they are translated from strings to integers
+ *      in order to transform from ELAN variables to Bayesian network variables.
+ *
+ *      The trigger topic will be published when the end time of the usr_present 
+ *      annotation is finished. This trigger will be used to train or perform inference 
+ *      with all the immediate annotations.
  *      
  *      Lunds tekniska högskola | LTH 2015
  *      Felip Marti Carrillo
@@ -19,6 +23,7 @@
 #include "data_parser/Parse.h"
 #include "data_parser/DataParsed.h"
 #include "interaction_monitor/AnnotationVariable.h"
+#include "std_msgs/Bool.h"
 
 class ElanTranslator {
 
@@ -36,6 +41,7 @@ private:
     ros::Publisher heading_adj_pub;
     ros::Publisher dist_adj_pub;
     ros::Publisher category_pub;
+    ros::Publisher trigger_pub;
 
     // Dictionaries
     std::map<std::string,int> ObjCategory;

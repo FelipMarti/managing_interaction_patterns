@@ -1,9 +1,13 @@
 /**
- *      This node calls the parser ROS-service, once for each input file, 
+ *      This node calls the ROS-service parser for each input file 
  *      and publishes all the Annotations that appear in time intervals of 500ms
  *      
- *      Before publishing those annotations are translated from strings to integers
- *      in order to train or perform inference later in a Bayesian network
+ *      Before publishing those annotations, they are translated from strings to integers
+ *      in order to transform from ELAN variables to Bayesian network variables.
+ *
+ *      The trigger topic will be published when the end time of the usr_present 
+ *      annotation is finished. This trigger will be used to train or perform inference 
+ *      with all the immediate annotations.
  *      
  *      Lunds tekniska högskola | LTH 2015
  *      Felip Marti Carrillo
@@ -19,14 +23,15 @@ ElanTranslator::ElanTranslator (void)
 {
 
     /// Init publishers
-    last_command_pub = n.advertise<interaction_monitor::AnnotationVariable>("last_command",10);
-    announce_pub = n.advertise<interaction_monitor::AnnotationVariable>("announcement",10);
-    gesture_pub = n.advertise<interaction_monitor::AnnotationVariable>("gesture",10);
-    heading_adj_pub = n.advertise<interaction_monitor::AnnotationVariable>("heading_adj",10);
-    dist_adj_pub = n.advertise<interaction_monitor::AnnotationVariable>("dist_adj",10);
-    category_pub = n.advertise<interaction_monitor::AnnotationVariable>("category",10);
+    last_command_pub = n.advertise<interaction_monitor::AnnotationVariable>("ELAN_last_cmd",10);
+    announce_pub = n.advertise<interaction_monitor::AnnotationVariable>("ELAN_announce",10);
+    gesture_pub = n.advertise<interaction_monitor::AnnotationVariable>("ELAN_gesture",10);
+    heading_adj_pub = n.advertise<interaction_monitor::AnnotationVariable>("ELAN_heading_adj",10);
+    dist_adj_pub = n.advertise<interaction_monitor::AnnotationVariable>("ELAN_dist_adj",10);
+    category_pub = n.advertise<interaction_monitor::AnnotationVariable>("ELAN_category",10);
+    trigger_pub = n.advertise<std_msgs::Bool>("ELAN_trigger",1);
 
-    /// Filling dicctionaries
+    /// Filling dictionaries
     write_category_dictionary();
     write_gesture_dictionary();
     write_command_dictionary();
@@ -41,7 +46,7 @@ ElanTranslator::~ElanTranslator (void)
 int ElanTranslator::Main (int argc, char **argv) 
 {
 
-    ros::Rate loop_rate(200);
+    ros::Rate loop_rate(2000);
 
     /// Init service
     ros::ServiceClient client = n.serviceClient<data_parser::Parse>("parse_data");
@@ -52,18 +57,18 @@ int ElanTranslator::Main (int argc, char **argv)
     for (int i=0;i<argc-2;++i) {
         srv.request.path = (std::string)argv[1] + (std::string)argv[i+2];
         if (client.call(srv)) {
-            ROS_INFO("[elan_translator] Calling parse_data_srv");
+            ROS_INFO("[ELAN_translator] Calling parse_data_srv");
         }
         else {
-            ROS_ERROR("[elan_translator] Failed to call service parse_data_srv");
+            ROS_ERROR("[ELAN_translator] Failed to call service parse_data_srv");
             return 1;
         }
         dataXmlFile[i]=srv.response.data;
     }
 
-    ROS_INFO("[elan_translator] Waiting 0.5s to get ready the publisher");
+    ROS_INFO("[ELAN_translator] Waiting 0.5s to get ready the publisher");
     ros::Duration(0.5).sleep();
-    ROS_INFO("[elan_translator] Start Publishing!");
+    ROS_INFO("[ELAN_translator] Start Publishing!");
 
     /// Main Loop
     // For all files entered
@@ -133,6 +138,11 @@ int ElanTranslator::Main (int argc, char **argv)
                     }
                     // Check end time to erase element
                     if (dataXmlFile[j].data[i].list[0].tend <= currentTime) {
+                        if (dataXmlFile[j].data[i].id == "usr_present") {
+                            std_msgs::Bool hola;
+                            hola.data = 1;
+                            trigger_pub.publish(hola);
+                        }
                         dataXmlFile[j].data[i].list.erase(dataXmlFile[j].data[i].list.begin());
     
                     }
@@ -157,6 +167,9 @@ int ElanTranslator::Main (int argc, char **argv)
 
     }
 
+    ROS_WARN("[ELAN_translator] No more data!");
+    ROS_WARN("[ELAN_translator] So, the node will be stopped gently :)");
+    exit(0);
 
 }
 
@@ -168,7 +181,7 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "elan_translator_node");
     if (argc < 3) {
         ROS_ERROR(
-        "[elan_translator] usage: elan_translator_node PATH_FILE(s) FILE_1 FILE_2 .. FILE_N");
+        "[ELAN_translator] usage: elan_translator_node PATH_FILE(s) FILE_1 FILE_2 .. FILE_N");
         exit(1);
     }
 
