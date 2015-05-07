@@ -1,7 +1,7 @@
 /*
  *      This node is subscribed to 5 different interaction pattern topics:
  *      /last_command, /announce, /gesture, /heading_adj, /dist_adj 
- *      and also to a /presentation topic. This last topic is the one who will
+ *      also to the /category and /trigger topic. This last topic is the one who will
  *      trigger the publisher.
  *      
  *      The publisher is a vector of Bayesian Network variables that will train
@@ -19,6 +19,9 @@
 
 #include "ros/ros.h"
 #include "data_parser/DataParsed.h"
+#include "interaction_monitor/AnnotationVariable.h"
+#include "interaction_monitor/BayesianNetworkVariable.h"
+#include "std_msgs/Bool.h"
 
 class InteractionMonitor {
 
@@ -27,24 +30,37 @@ private:
     ros::NodeHandle n;
 
     // [subscriber attributes]
-    ros::Subscriber sub; 
-    void last_command_callback (const data_parser::DataParsed& msg);
-    void announcement_callback (const data_parser::DataParsed& msg);
-    void gesture_callback (const data_parser::DataParsed& msg);
-    void heading_adj_callback (const data_parser::DataParsed& msg);
-    void dist_adj_callback (const data_parser::DataParsed& msg);
-    void category_callback (const data_parser::DataParsed& msg);
+    ros::Subscriber last_command_sub; 
+    ros::Subscriber announcement_sub; 
+    ros::Subscriber gesture_sub; 
+    ros::Subscriber heading_adj_sub; 
+    ros::Subscriber dist_adj_sub; 
+    ros::Subscriber category_sub; 
+    ros::Subscriber trigger_sub; 
+
+    void last_command_callback (const interaction_monitor::AnnotationVariable& msg);
+    void announcement_callback (const interaction_monitor::AnnotationVariable& msg);
+    void gesture_callback (const interaction_monitor::AnnotationVariable& msg);
+    void heading_adj_callback (const interaction_monitor::AnnotationVariable& msg);
+    void dist_adj_callback (const interaction_monitor::AnnotationVariable& msg);
+    void category_callback (const interaction_monitor::AnnotationVariable& msg);
+    void trigger_callback (const std_msgs::Bool& msg);
 
     // [publisher attributes]
+    ros::Publisher bnVars_pub;
+
 
     /// Variables
     // Annotations vars
-    int last_command_store;
-    int announcement_store;
-    int gesture_store;
-    int heading_adj_store;
-    int dist_adj_store;
-    int category_store;
+    interaction_monitor::AnnotationVariable lastCommandStore;
+    interaction_monitor::AnnotationVariable announcementStore;
+    interaction_monitor::AnnotationVariable gestureStore;
+    interaction_monitor::AnnotationVariable headingAdjStore;
+    interaction_monitor::AnnotationVariable distAdjStore;
+    interaction_monitor::AnnotationVariable categoryStore;
+    
+    // Publisher counter var
+    int pubCounter;
 
 
 public:
