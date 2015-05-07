@@ -5,9 +5,12 @@
  *      Before publishing those annotations, they are translated from strings to integers
  *      in order to transform from ELAN variables to Bayesian network variables.
  *
- *      The trigger topic will be published when the end time of the usr_present 
+ *      The trigger topic will be published with a "true" when the end time of the usr_present 
  *      annotation is finished. This trigger will be used to train or perform inference 
- *      with all the immediate annotations.
+ *      with all the immediate annotations in the subscriber nodes.
+ *
+ *      When there is no more data and before closing the node the trigger topic 
+ *      will publish "false"
  *      
  *      Lunds tekniska högskola | LTH 2015
  *      Felip Marti Carrillo
@@ -140,7 +143,7 @@ int ElanTranslator::Main (int argc, char **argv)
                     if (dataXmlFile[j].data[i].list[0].tend <= currentTime) {
                         if (dataXmlFile[j].data[i].id == "usr_present") {
                             std_msgs::Bool hola;
-                            hola.data = 1;
+                            hola.data = true;
                             trigger_pub.publish(hola);
                         }
                         dataXmlFile[j].data[i].list.erase(dataXmlFile[j].data[i].list.begin());
@@ -166,6 +169,11 @@ int ElanTranslator::Main (int argc, char **argv)
         
 
     }
+
+    // Publishing false in trigger to indicate that there is no more data
+    std_msgs::Bool hola;
+    hola.data = false;
+    trigger_pub.publish(hola);
 
     ROS_WARN("[ELAN_translator] No more data!");
     ROS_WARN("[ELAN_translator] So, the node will be stopped gently :)");

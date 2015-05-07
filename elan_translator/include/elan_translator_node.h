@@ -5,9 +5,12 @@
  *      Before publishing those annotations, they are translated from strings to integers
  *      in order to transform from ELAN variables to Bayesian network variables.
  *
- *      The trigger topic will be published when the end time of the usr_present 
+ *      The trigger topic will be published with a "true" when the end time of the usr_present 
  *      annotation is finished. This trigger will be used to train or perform inference 
- *      with all the immediate annotations.
+ *      with all the immediate annotations in the subscriber nodes.
+ *
+ *      When there is no more data and before closing the node the trigger topic 
+ *      will publish "false"
  *      
  *      Lunds tekniska högskola | LTH 2015
  *      Felip Marti Carrillo
