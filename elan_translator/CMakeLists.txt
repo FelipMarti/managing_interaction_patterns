@@ -102,8 +102,6 @@ include_directories(
 # )
 
 ## Declare a cpp executable
- add_executable(elan_translator_publisher src/elan_translator_publisher.cpp)
- add_executable(elan_translator_present src/elan_translator_present.cpp)
  add_executable(elan_translator_node src/elan_translator_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
@@ -111,12 +109,6 @@ include_directories(
 # add_dependencies(elan_translator_node elan_translator_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(elan_translator_publisher
-    ${catkin_LIBRARIES}
- )
- target_link_libraries(elan_translator_present
-    ${catkin_LIBRARIES}
- )
  target_link_libraries(elan_translator_node
     ${catkin_LIBRARIES}
  )
