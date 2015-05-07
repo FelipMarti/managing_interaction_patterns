@@ -102,7 +102,8 @@ void InteractionMonitor::category_callback
  */
 void InteractionMonitor::trigger_callback (const std_msgs::Bool& msg)
 {
-    // Checking if the bool received is true to publish
+    // Checking if the bool received is true to publish annotations.
+    // if its false we will publish -1s
     if (msg.data) {
                 
         /// Filling publisher var with annotations taking into account the time 10s
@@ -116,7 +117,7 @@ void InteractionMonitor::trigger_callback (const std_msgs::Bool& msg)
             tmpPubVar.last_cmd = lastCommandStore.value;
         }
         else {
-            tmpPubVar.last_cmd = 0; 
+            tmpPubVar.last_cmd = 5; // none
         }
 
         // Announcement
@@ -126,7 +127,7 @@ void InteractionMonitor::trigger_callback (const std_msgs::Bool& msg)
             tmpPubVar.announce = announcementStore.value;
         }
         else {
-            tmpPubVar.announce = 0; 
+            tmpPubVar.announce = 0; // no
         }
 
         // Gesture
@@ -136,7 +137,7 @@ void InteractionMonitor::trigger_callback (const std_msgs::Bool& msg)
             tmpPubVar.gesture = gestureStore.value;
         }
         else {
-            tmpPubVar.gesture = 0; 
+            tmpPubVar.gesture = 5; // none
         }
 
         // Heading adjustment 
@@ -146,7 +147,7 @@ void InteractionMonitor::trigger_callback (const std_msgs::Bool& msg)
             tmpPubVar.head_adj = headingAdjStore.value;
         }
         else {
-            tmpPubVar.head_adj = 0; 
+            tmpPubVar.head_adj = 0; // no
         }
 
         // Distance adjustment 
@@ -156,7 +157,7 @@ void InteractionMonitor::trigger_callback (const std_msgs::Bool& msg)
             tmpPubVar.dist_adj = distAdjStore.value;
         }
         else {
-            tmpPubVar.dist_adj = 0; 
+            tmpPubVar.dist_adj = 0; // no
         }
 
         // Category 
@@ -166,12 +167,20 @@ void InteractionMonitor::trigger_callback (const std_msgs::Bool& msg)
             tmpPubVar.category = categoryStore.value;
         }
         else {
-            tmpPubVar.category = 0; 
+            tmpPubVar.category = 3; // unknown  
         }
 
         /// Publishing
         pubCounter++;
         ROS_INFO("[interaction_monitor] Triggered! Publication #%d",pubCounter);
+        bnVars_pub.publish(tmpPubVar);
+
+    }
+    else {
+
+        // -1 when there are no more annotations coming
+        interaction_monitor::BayesianNetworkVariable tmpPubVar;
+        tmpPubVar.category=-1;
         bnVars_pub.publish(tmpPubVar);
 
     }
