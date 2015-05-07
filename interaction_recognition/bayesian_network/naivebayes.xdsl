@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<smile version="1.0" id="Unnamed" numsamples="1000" discsamples="10000">
+	<nodes>
+		<cpt id="category">
+			<state id="object" />
+			<state id="region" />
+			<state id="workspace" />
+			<state id="unknown" />
+			<probabilities>0.3811475409836065 0.1261384335154827 0.3556466302367942 0.1370673952641166</probabilities>
+		</cpt>
+		<cpt id="lastCommand">
+			<state id="back" />
+			<state id="follow" />
+			<state id="forward" />
+			<state id="stop" />
+			<state id="turn" />
+			<state id="none" />
+			<parents>category</parents>
+			<probabilities>0.01031746031746032 0.0007936507936507938 0.005555555555555557 0.1484126984126984 0.04841269841269841 0.7865079365079365 0.002380952380952381 0.01666666666666667 0.002380952380952381 0.430952380952381 0.03095238095238095 0.5166666666666666 0.0008503401360544218 0.01105442176870748 0.02125850340136054 0.342687074829932 0.07227891156462585 0.5518707482993197 0.002192982456140351 0.02850877192982456 0.02850877192982456 0.331140350877193 0.1206140350877193 0.4890350877192982</probabilities>
+		</cpt>
+		<cpt id="usrAnnounce">
+			<state id="no" />
+			<state id="yes" />
+			<parents>category</parents>
+			<probabilities>0.9976190476190477 0.002380952380952381 0.95 0.05 0.9770408163265305 0.02295918367346939 0.9671052631578947 0.03289473684210526</probabilities>
+		</cpt>
+		<cpt id="usrGesture">
+			<state id="fingertip_point" />
+			<state id="hand_point" />
+			<state id="hold_item" />
+			<state id="sweep_wave" />
+			<state id="touch_full_hand" />
+			<state id="none" />
+			<parents>category</parents>
+			<probabilities>0.1150793650793651 0.0626984126984127 0.5103174603174604 0.0007936507936507938 0.1579365079365079 0.1531746031746032 0.01666666666666667 0.07380952380952381 0.002380952380952381 0.1452380952380952 0.002380952380952381 0.7595238095238095 0.2355442176870748 0.1743197278911564 0.02125850340136054 0.03146258503401361 0.2559523809523809 0.2814625850340136 0.2785087719298245 0.212719298245614 0.01535087719298246 0.01535087719298246 0.2521929824561404 0.2258771929824561</probabilities>
+		</cpt>
+		<cpt id="headingAdj">
+			<state id="no" />
+			<state id="yes" />
+			<parents>category</parents>
+			<probabilities>0.8023809523809524 0.1976190476190476 0.5214285714285715 0.4785714285714285 0.6403061224489796 0.3596938775510204 0.5855263157894737 0.4144736842105263</probabilities>
+		</cpt>
+		<cpt id="distanceAdj">
+			<state id="no" />
+			<state id="yes" />
+			<parents>category</parents>
+			<probabilities>0.9738095238095239 0.02619047619047619 0.8071428571428572 0.1928571428571428 0.885204081632653 0.1147959183673469 0.9276315789473684 0.07236842105263158</probabilities>
+		</cpt>
+	</nodes>
+	<extensions>
+		<genie version="1.0" app="SMILE Apr 10 2014" name="Unnamed" faultnameformat="nodestate">
+			<node id="lastCommand">
+				<name>lastCommand</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="MS Sans Serif" size="8" />
+				<position>-38 -18 38 18</position>
+			</node>
+			<node id="usrAnnounce">
+				<name>usrAnnounce</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="MS Sans Serif" size="8" />
+				<position>-38 -18 38 18</position>
+			</node>
+			<node id="usrGesture">
+				<name>usrGesture</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="MS Sans Serif" size="8" />
+				<position>-38 -18 38 18</position>
+			</node>
+			<node id="headingAdj">
+				<name>headingAdj</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="MS Sans Serif" size="8" />
+				<position>-38 -18 38 18</position>
+			</node>
+			<node id="distanceAdj">
+				<name>distanceAdj</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="MS Sans Serif" size="8" />
+				<position>-38 -18 38 18</position>
+			</node>
+			<node id="category">
+				<name>category</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="MS Sans Serif" size="8" />
+				<position>-38 -18 38 18</position>
+			</node>
+		</genie>
+	</extensions>
+</smile>
