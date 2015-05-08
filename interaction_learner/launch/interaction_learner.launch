@@ -1,0 +1,16 @@
+<launch>
+
+    <!-- Input Parameters -->
+    <arg name="BN" />
+
+    <!-- Interaction_learner  -->
+    <node name="interaction_learner" 
+        pkg="interaction_learner" 
+        type="interaction_learner_node" 
+        output="screen" 
+        args="$(find interaction_recognition)/bayesian_network/ $(arg BN)" >
+    </node>
+
+
+</launch>
+
