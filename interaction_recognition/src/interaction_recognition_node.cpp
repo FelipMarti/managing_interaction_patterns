@@ -161,7 +161,7 @@ void InteractionRecognition::perform_inference_callback
             Stats_Results[5]++;     // Nice, Unknown category classified!
         }
         else {
-            Stats_Results[1]++;     // Missmatch!!
+            Stats_Results[1]++;     // Mismatch!!
             std::ostringstream stringStream;
             stringStream << categoryData <<"->"
                          << CategoryWin;
@@ -184,7 +184,7 @@ void InteractionRecognition::perform_inference_callback
         if ( P_CategoryIs[categoryData] < MAX_DIFF or categoryData == 3) {
             Stats_Results[3]++;     // Category is among them, or is Unknown
             std::ostringstream stringStream;
-            stringStream << categoryData <<" "<< equalCategories[0]<<", "
+            stringStream << categoryData <<" -> "<< equalCategories[0]<<", "
                          << equalCategories[1]<<" or " << equalCategories[2];
             statsAmong3.push_back(stringStream.str());
         }
