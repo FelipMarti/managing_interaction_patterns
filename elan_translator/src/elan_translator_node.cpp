@@ -119,17 +119,17 @@ int ElanTranslator::Main (int argc, char **argv)
 
                             std::size_t found1=dataXmlFile[j].data[i].list[0].text.find("left");
                             std::size_t found2=dataXmlFile[j].data[i].list[0].text.find("right");
-                            if ( found1!=std::string::npos or found2!=std::string::npos ) {
+                            std::size_t found3=dataXmlFile[j].data[i].list[0].text.find("front");
+                            std::size_t found4=dataXmlFile[j].data[i].list[0].text.find("back");
+                            if ( found1!=std::string::npos or found2!=std::string::npos or 
+                                 found3!=std::string::npos or found4!=std::string::npos ) {
                                 tmpAnnotation.value = 1;    //yes
                                 heading_adj_pub.publish(tmpAnnotation);
                             }
                             
                             found1=dataXmlFile[j].data[i].list[0].text.find("closer");
                             found2=dataXmlFile[j].data[i].list[0].text.find("further");
-                            std::size_t found3=dataXmlFile[j].data[i].list[0].text.find("front");
-                            std::size_t found4=dataXmlFile[j].data[i].list[0].text.find("back");
-                            if ( found1!=std::string::npos or found2!=std::string::npos or 
-                                 found3!=std::string::npos or found4!=std::string::npos ) {
+                            if ( found1!=std::string::npos or found2!=std::string::npos ) { 
                                 tmpAnnotation.value = 1;   //yes
                                 dist_adj_pub.publish(tmpAnnotation);
                             }
