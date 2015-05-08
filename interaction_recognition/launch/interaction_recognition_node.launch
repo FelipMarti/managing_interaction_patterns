@@ -4,7 +4,7 @@
     <arg name="BN" />
 
     <!-- Interaction monitor base -->
-    <node name="interaction_recognition_node" 
+    <node name="interaction_recognition" 
         pkg="interaction_recognition" 
         type="interaction_recognition_node" 
         output="screen" 
