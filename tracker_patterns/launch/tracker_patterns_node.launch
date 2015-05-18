@@ -1,0 +1,15 @@
+<launch>
+
+    <!-- Input Parameters -->
+    <arg name="DATA" />
+
+    <!-- Interaction_monitor publisher -->
+    <node name="elan_translator" 
+        pkg="elan_translator" 
+        type="elan_translator_node" 
+        output="screen" 
+        args="$(find tracker_patterns)/data/ $(arg DATA)" >
+    </node>
+
+
+</launch>
