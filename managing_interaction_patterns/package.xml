@@ -43,6 +43,7 @@
   <run_depend>interaction_monitor</run_depend> 
   <run_depend>interaction_recognition</run_depend> 
   <run_depend>interaction_learner</run_depend> 
+  <run_depend>tracker_patterns</run_depend> 
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
