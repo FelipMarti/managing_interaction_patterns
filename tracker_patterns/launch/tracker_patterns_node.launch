@@ -4,9 +4,9 @@
     <arg name="DATA" />
 
     <!-- Interaction_monitor publisher -->
-    <node name="elan_translator" 
-        pkg="elan_translator" 
-        type="elan_translator_node" 
+    <node name="tracker_patterns" 
+        pkg="tracker_patterns" 
+        type="tracker_patterns_node" 
         output="screen" 
         args="$(find tracker_patterns)/data/ $(arg DATA)" >
     </node>

@@ -30,57 +30,72 @@ int TrackerPatterns::Main (int argc, char **argv)
     ros::Rate loop_rate(2000);
 
 
-    /// Extracting data 
-    std::ifstream odom_file;
-    std::ifstream traj_file;
 
-
-    for (int i=0;i<argc-2;i+=2) {
-//TODO: this is not working well, check it!!!!!
-        char str[100];
-        strcpy (str,argv[1]);
-        strcat (str,argv[i+2]);
-        odom_file.open( str ); 
-        if ( odom_file.is_open() ) {
-            ROS_INFO("[tracker_patterns] %s",str);
-        }
-        else {
-            ROS_INFO("[tracker_patterns] NOT OPEN");
-        }
-        strcpy (str,argv[1]);
-        strcat (str,argv[i+3]);
-        traj_file.open( str );
-        if (odom_file.is_open() ) {
-            ROS_INFO("[tracker_patterns] %s",str);
-        }
-        else {
-            ROS_INFO("[tracker_patterns] NOT OPEN");
-        }
-
-
-
-
-
-    }
 
     ROS_INFO("[tracker_patterns] Waiting 0.5s to get ready the publisher");
     ros::Duration(0.5).sleep();
     ROS_INFO("[tracker_patterns] Start Publishing!");
 
-    /// Main Loop
-    while (ros::ok()) {
+
+    // For all the inputs
+    for (int i=0;i<argc-2;i+=2) {
+
+        /// Extracting data 
+        std::ifstream odom_file;
+        std::ifstream traj_file;
+
+        char str[100];
+        // Concatenating absolute path with file
+        strcpy (str,argv[1]);
+        strcat (str,"odom/");
+        strcat (str,argv[i+2]);
+        odom_file.open( str ); 
+        if ( odom_file.is_open() ) {
+            ROS_INFO("[tracker_patterns] Opening: %s",str);
+        }
+        else {
+            ROS_ERROR("[tracker_patterns] NOT OPEN: %s",str);
+            ROS_ERROR("[tracker_patterns] ERROR, closing node");
+            exit(1);
+        }
+        // Concatenating absolute path with file
+        strcpy (str,argv[1]);
+        strcat (str,"traj/");
+        strcat (str,argv[i+3]);
+        traj_file.open( str );
+        if (traj_file.is_open() ) {
+            ROS_INFO("[tracker_patterns] Opening: %s",str);
+        }
+        else {
+            ROS_ERROR("[tracker_patterns] NOT OPEN: %s",str);
+            ROS_ERROR("[tracker_patterns] ERROR, closing node");
+            exit(1);
+        }
+
+
+        bool endOfFile = false;
+
+        /// Main Loop
+        while (ros::ok() and !endOfFile) {
+            
+            //TODO: Process data, filter, calc thresholds
+            //TODO: Check odom data file 
+            //TODO: Publish
+
+            endOfFile = true;
+
+            odom_file.close();
+            traj_file.close();
     
-        ros::spinOnce();
-        loop_rate.sleep();
+            ros::spinOnce();
+            loop_rate.sleep();
+
+        }
 
     }
 
-
     ROS_WARN("[tracker_patterns] No more data!");
     ROS_WARN("[tracker_patterns] So, the node will be stopped gently :)");
-
-    odom_file.close();
-    traj_file.close();
 
     exit(0);
 
