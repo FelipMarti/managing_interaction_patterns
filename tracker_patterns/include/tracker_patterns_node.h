@@ -13,6 +13,7 @@
 #include "ros/ros.h"
 #include "interaction_monitor/AnnotationVariable.h"
 #include <fstream>
+#include <numeric>
 
 class TrackerPatterns {
 
@@ -27,6 +28,11 @@ private:
     ros::Publisher heading_adj_pub;
     ros::Publisher dist_adj_pub;
 
+    // Variables
+    std::vector <double> distanceFilter;
+    std::vector <double> angleFilter;
+    
+    double currentTimeStamp;
 
 
 public:

@@ -73,24 +73,85 @@ int TrackerPatterns::Main (int argc, char **argv)
         }
 
 
-        bool endOfFile = false;
+        bool endFile = false;
+        // This var will be updated by a subscriber in a future
+        currentTimeStamp = 1274451145;
+        double timeStamp = currentTimeStamp;   //TimeStamp read from the file
 
         /// Main Loop
-        while (ros::ok() and !endOfFile) {
+        while (ros::ok() and !endFile) {
             
-            //TODO: Process data, filter, calc thresholds
+            //TODO: Process data, filter, almos done
+            //TODO: calc thresholds
             //TODO: Check odom data file 
             //TODO: Publish
 
-            endOfFile = true;
+            // Initialisations
+            std::string line;
+            double dummy, distance, angle;
+            distanceFilter.resize(0); 
+            angleFilter.resize(0); 
+            int len;   //Var to store position of the line in a file
 
-            odom_file.close();
-            traj_file.close();
+            /**
+             *  The main idea in this loop is to calc the average distance 
+             *  value and angle that happens in interval times of 0.5s
+             *  For instance:
+             *                         1274451145.0 - 1274451145.5
+             *                         1274451145.5 - 1274451146.0
+             */
+            while ( !endFile and currentTimeStamp+0.5 > timeStamp ) {
+
+                // Get current position
+                len = traj_file.tellg();
+                // Read a line
+                endFile = std::getline(traj_file, line).eof();
+
+                // Reading columns
+                std::istringstream ss(line);
+                ss >> timeStamp >> dummy >> dummy >> distance >> dummy >> dummy 
+                >> dummy >> dummy >> angle;
+
+                distanceFilter.push_back(distance);
+                angleFilter.push_back(angle);
+
+            }
+
+            /**
+             *  The last value stored belongs to the next time interval.
+             *  Therefore, here we remove that value from the vector
+             *  and return that line to the buffer.
+             */
+            if ( !endFile and distanceFilter.size() != 0) {
+                distanceFilter.pop_back();
+                angleFilter.pop_back();
+                // Return to position before "Read line".
+                traj_file.seekg(len ,std::ios_base::beg);
+            }
+//TODO:debug!!!!!!!!!!!!!!!!!!!!!! this
+            // Printing to test :)
+            ROS_INFO("[tracker_patterns] Current Time Stamp: %f", currentTimeStamp);
+            if (distanceFilter.size() != 0) {
+                double sumElems =std::accumulate(distanceFilter.begin(),distanceFilter.end(),0);
+                ROS_INFO("[tracker_patterns] Distance: %f",sumElems/distanceFilter.size());
+                sumElems =std::accumulate(angleFilter.begin(),angleFilter.end(),0);
+                ROS_INFO("[tracker_patterns] Angle: %f",sumElems/angleFilter.size());
+                std::cout << distanceFilter.size() << "  " << angleFilter.size()<< std::endl;
+                for (int i=0;i<distanceFilter.size();i++) {
+                    std::cout<<distanceFilter[i]<<" ";
+                }
+                std::cout<<std::endl;
+            }
+            // This var will be updated by a subscriber in a future
+            currentTimeStamp+=0.5;
     
             ros::spinOnce();
             loop_rate.sleep();
 
         }
+
+        odom_file.close();
+        traj_file.close();
 
     }
 
