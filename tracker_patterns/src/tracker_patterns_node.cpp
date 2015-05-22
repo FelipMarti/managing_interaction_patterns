@@ -10,7 +10,7 @@
 #include "tracker_patterns_node.h"
 
 
-TrackerPatterns::TrackerPatterns (void)
+TrackerPatterns::TrackerPatterns (void) 
 {
 
     /// Init publishers
@@ -29,9 +29,6 @@ int TrackerPatterns::Main (int argc, char **argv)
 
     ros::Rate loop_rate(2000);
 
-
-
-
     ROS_INFO("[tracker_patterns] Waiting 0.5s to get ready the publisher");
     ros::Duration(0.5).sleep();
     ROS_INFO("[tracker_patterns] Start Publishing!");
@@ -40,7 +37,9 @@ int TrackerPatterns::Main (int argc, char **argv)
     // For all the inputs
     for (int i=0;i<argc-2;i+=2) {
 
-        /// Extracting data 
+        /**
+         *  Extracting all data for each file entered as a parameter. 
+         */
         std::ifstream odom_file;
         std::ifstream traj_file;
 
@@ -72,17 +71,15 @@ int TrackerPatterns::Main (int argc, char **argv)
             exit(1);
         }
 
-
         bool endFile = false;
         // This var will be updated by a subscriber in a future
         currentTimeStamp = 1274451145;
         double timeStamp = currentTimeStamp;   //TimeStamp read from the file
 
-        /// Main Loop
+        /// Main Loop, looping until the end of the file
         while (ros::ok() and !endFile) {
             
-            //TODO: Process data, filter, almos done
-            //TODO: calc thresholds
+            //TODO: calc angle threshold
             //TODO: Check odom data file 
             //TODO: Publish
 
@@ -109,8 +106,8 @@ int TrackerPatterns::Main (int argc, char **argv)
 
                 // Reading columns
                 std::istringstream ss(line);
-                ss >> timeStamp >> dummy >> dummy >> distance >> dummy >> dummy 
-                >> dummy >> dummy >> angle;
+                ss >> timeStamp >> dummy >> dummy >> dummy >> dummy >> dummy 
+                >> dummy >> distance >> angle;
 
                 distanceFilter.push_back(distance);
                 angleFilter.push_back(angle);
@@ -122,26 +119,58 @@ int TrackerPatterns::Main (int argc, char **argv)
              *  Therefore, here we remove that value from the vector
              *  and return that line to the buffer.
              */
-            if ( !endFile and distanceFilter.size() != 0) {
+            if ( distanceFilter.size() != 0) {
                 distanceFilter.pop_back();
                 angleFilter.pop_back();
                 // Return to position before "Read line".
                 traj_file.seekg(len ,std::ios_base::beg);
             }
-//TODO:debug!!!!!!!!!!!!!!!!!!!!!! this
-            // Printing to test :)
-            ROS_INFO("[tracker_patterns] Current Time Stamp: %f", currentTimeStamp);
+
+            /**
+             *  Filtering, updating last values and checking thresholds
+             *  considering 0.5s and 1s before. 
+             *  If there are no previous values to compare, it doesn't publish 
+             */
             if (distanceFilter.size() != 0) {
-                double sumElems =std::accumulate(distanceFilter.begin(),distanceFilter.end(),0);
-                ROS_INFO("[tracker_patterns] Distance: %f",sumElems/distanceFilter.size());
-                sumElems =std::accumulate(angleFilter.begin(),angleFilter.end(),0);
-                ROS_INFO("[tracker_patterns] Angle: %f",sumElems/angleFilter.size());
-                std::cout << distanceFilter.size() << "  " << angleFilter.size()<< std::endl;
-                for (int i=0;i<distanceFilter.size();i++) {
-                    std::cout<<distanceFilter[i]<<" ";
+
+                // Filtering values 
+                double sumElemsD =std::accumulate(distanceFilter.begin(),distanceFilter.end(),0);
+                distancePrevious.push_back(sumElemsD/distanceFilter.size());
+                double sumElemsA =std::accumulate(angleFilter.begin(),angleFilter.end(),0);
+                anglePrevious.push_back(sumElemsA/angleFilter.size());
+
+                // Storing value
+                distancePrevious.push_back(sumElemsD/distanceFilter.size());
+                anglePrevious.push_back(sumElemsA/angleFilter.size());
+
+                // Checking thresholds
+                if (distancePrevious.size() > 3) {
+                    distancePrevious.erase (distancePrevious.begin()); 
+                    // THRESHOLD
+                    if ( abs (distancePrevious[2] - distancePrevious[1]) > MAX_DIST_TH or
+                         abs (distancePrevious[2] - distancePrevious[0]) > MAX_DIST_TH) {
+                        //TODO: CHECK odom  
+                        //TODO: publish
+                    }
                 }
-                std::cout<<std::endl;
+                if (anglePrevious.size() > 3) {
+                    anglePrevious.erase (anglePrevious.begin()); 
+                    // THRESHOLD
+                    if ( abs (anglePrevious[2] - anglePrevious[1]) > MAX_ANGL_TH or
+                         abs (anglePrevious[2] - anglePrevious[0]) > MAX_ANGL_TH) {
+                        //TODO: CHECK odom  
+                        //TODO: publish
+                    }
+                }
+
+    
+
+
             }
+
+            
+
+
             // This var will be updated by a subscriber in a future
             currentTimeStamp+=0.5;
     

@@ -31,8 +31,15 @@ private:
     // Variables
     std::vector <double> distanceFilter;
     std::vector <double> angleFilter;
+
+    std::vector <double> distancePrevious;
+    std::vector <double> anglePrevious;
     
     double currentTimeStamp;
+
+    static const int MAX_DIST_TH = 200;
+    static const int MAX_ANGL_TH = 3.14159265358979/4;
+
 
 
 public:
