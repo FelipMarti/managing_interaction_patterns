@@ -38,7 +38,7 @@ int TrackerPatterns::Main (int argc, char **argv)
     for (int i=0;i<argc-2;i+=2) {
 
         /**
-         *  Extracting all data for each file entered as a parameter. 
+         *  Opening and extracting all data for each file entered as a parameter. 
          */
         std::ifstream odom_file;
         std::ifstream traj_file;
@@ -72,17 +72,15 @@ int TrackerPatterns::Main (int argc, char **argv)
         }
 
         bool endFile = false;
-        // This var will be updated by a subscriber in a future
+        // This var currentTimeStamp will be updated by a subscriber in a future
         currentTimeStamp = 1274451145;
         double timeStamp = currentTimeStamp;   //TimeStamp read from the file
 
-        /// Main Loop, looping until the end of the file
+        /**
+         *  Main Loop. Looping and publishing until the end of the file.
+         */
         while (ros::ok() and !endFile) {
             
-            //TODO: calc angle threshold
-            //TODO: Check odom data file 
-            //TODO: Publish
-
             // Initialisations
             std::string line;
             double dummy, distance, angle;
@@ -97,9 +95,10 @@ int TrackerPatterns::Main (int argc, char **argv)
              *                         1274451145.0 - 1274451145.5
              *                         1274451145.5 - 1274451146.0
              */
-            while ( !endFile and currentTimeStamp+0.5 > timeStamp ) {
+            const double FIVEMS = 0.5;
+            while ( !endFile and currentTimeStamp+FIVEMS > timeStamp ) {
 
-                // Get current position
+                // Get current position in buffer file
                 len = traj_file.tellg();
                 // Read a line
                 endFile = std::getline(traj_file, line).eof();
@@ -109,6 +108,7 @@ int TrackerPatterns::Main (int argc, char **argv)
                 ss >> timeStamp >> dummy >> dummy >> dummy >> dummy >> dummy 
                 >> dummy >> distance >> angle;
 
+                // Storing values to calculate average value
                 distanceFilter.push_back(distance);
                 angleFilter.push_back(angle);
 
@@ -116,6 +116,8 @@ int TrackerPatterns::Main (int argc, char **argv)
 
             /**
              *  The last value stored belongs to the next time interval.
+             *  because the time stamp value is updated after processing 
+             *  distance and angle values.
              *  Therefore, here we remove that value from the vector
              *  and return that line to the buffer.
              */
@@ -129,8 +131,11 @@ int TrackerPatterns::Main (int argc, char **argv)
             /**
              *  Filtering, updating last values and checking thresholds
              *  considering 0.5s and 1s before. 
+             *  
              *  If there are no previous values to compare, it doesn't publish 
              */
+            bool distanceAdj=false;
+            bool angleAdj=false;
             if (distanceFilter.size() != 0) {
 
                 // Filtering values 
@@ -143,33 +148,40 @@ int TrackerPatterns::Main (int argc, char **argv)
                 distancePrevious.push_back(sumElemsD/distanceFilter.size());
                 anglePrevious.push_back(sumElemsA/angleFilter.size());
 
-                // Checking thresholds
+                // Checking DISTANCE threshold
                 if (distancePrevious.size() > 3) {
                     distancePrevious.erase (distancePrevious.begin()); 
                     // THRESHOLD
                     if ( abs (distancePrevious[2] - distancePrevious[1]) > MAX_DIST_TH or
                          abs (distancePrevious[2] - distancePrevious[0]) > MAX_DIST_TH) {
-                        //TODO: CHECK odom  
-                        //TODO: publish
+                        distanceAdj=true;
                     }
                 }
+                // Checking ANGLE threshold
                 if (anglePrevious.size() > 3) {
                     anglePrevious.erase (anglePrevious.begin()); 
                     // THRESHOLD
+                    // TODO: CHECK THRESHOLD
                     if ( abs (anglePrevious[2] - anglePrevious[1]) > MAX_ANGL_TH or
                          abs (anglePrevious[2] - anglePrevious[0]) > MAX_ANGL_TH) {
-                        //TODO: CHECK odom  
-                        //TODO: publish
+                        angleAdj=true;
                     }
                 }
 
-    
-
-
             }
 
+            /**
+             *  Checking in odometry file if the distance or angle adjustment is
+             *  because of the robot movement
+             */
+            bool odomValues = false;
+            if (distanceAdj or angleAdj) {
+                //TODO: CHECK odom  
+                odomValues = check_odom_file(odom_file, currentTimeStamp);
+                
+            }
             
-
+            //TODO: Publish 
 
             // This var will be updated by a subscriber in a future
             currentTimeStamp+=0.5;
@@ -189,6 +201,26 @@ int TrackerPatterns::Main (int argc, char **argv)
 
     exit(0);
 
+}
+
+
+bool TrackerPatterns::check_odom_file(std::ifstream &odom_file,
+                                        const double currentTimeStamp) 
+{
+
+//TODO: make it work...
+//TODO: Check values, currentTimeStamp, etc...!
+std::cout<< "[check_odom_file] " << currentTimeStamp << std::fixed << std::endl;
+    std::string line;
+    int currentTimeStampTrunc = currentTimeStamp;
+    for(unsigned int curLine = 0; getline(odom_file, line); curLine++) {
+std::cout<<line<<"  "<<currentTimeStamp<<std::endl;
+        if (line.find( currentTimeStampTrunc ) != std::string::npos) {
+            std::cout << "found: " << currentTimeStampTrunc << "line: " << curLine << std::endl;
+        }
+    }
+    
+    
 }
 
 

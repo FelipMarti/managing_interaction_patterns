@@ -40,6 +40,10 @@ private:
     static const int MAX_DIST_TH = 200;
     static const int MAX_ANGL_TH = 3.14159265358979/4;
 
+    // Functions
+    bool check_odom_file(std::ifstream &odom_file, 
+                                          const double currentTimeStamp);
+
 
 
 public:
