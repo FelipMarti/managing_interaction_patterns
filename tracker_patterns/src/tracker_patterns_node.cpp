@@ -40,33 +40,24 @@ int TrackerPatterns::Main (int argc, char **argv)
         /**
          *  Opening and extracting all data for each file entered as a parameter. 
          */
-        std::ifstream odom_file;
-        std::ifstream traj_file;
+        char odometryPathFile[100];
+        // Concatenating absolute path with odometry file
+        strcpy (odometryPathFile,argv[1]);
+        strcat (odometryPathFile,"odom/");
+        strcat (odometryPathFile,argv[i+2]);
 
-        char str[100];
-        // Concatenating absolute path with file
-        strcpy (str,argv[1]);
-        strcat (str,"odom/");
-        strcat (str,argv[i+2]);
-        odom_file.open( str ); 
-        if ( odom_file.is_open() ) {
-            ROS_INFO("[tracker_patterns] Opening: %s",str);
-        }
-        else {
-            ROS_ERROR("[tracker_patterns] NOT OPEN: %s",str);
-            ROS_ERROR("[tracker_patterns] ERROR, closing node");
-            exit(1);
-        }
-        // Concatenating absolute path with file
-        strcpy (str,argv[1]);
-        strcat (str,"traj/");
-        strcat (str,argv[i+3]);
-        traj_file.open( str );
+        std::ifstream traj_file;
+        char trajectoryPathFile[100];
+        // Concatenating absolute path with trajectory file name, and opening
+        strcpy (trajectoryPathFile,argv[1]);
+        strcat (trajectoryPathFile,"traj/");
+        strcat (trajectoryPathFile,argv[i+3]);
+        traj_file.open( trajectoryPathFile );
         if (traj_file.is_open() ) {
-            ROS_INFO("[tracker_patterns] Opening: %s",str);
+            ROS_INFO("[tracker_patterns] Opening trajectory file: %s",trajectoryPathFile);
         }
         else {
-            ROS_ERROR("[tracker_patterns] NOT OPEN: %s",str);
+            ROS_ERROR("[tracker_patterns] NOT OPEN: %s",trajectoryPathFile);
             ROS_ERROR("[tracker_patterns] ERROR, closing node");
             exit(1);
         }
@@ -177,7 +168,8 @@ int TrackerPatterns::Main (int argc, char **argv)
             bool odomValues = false;
             if (distanceAdj or angleAdj) {
                 //TODO: CHECK odom  
-                odomValues = check_odom_file(odom_file, currentTimeStamp);
+                //TODO: CHECK value returned  
+                odomValues = check_odom_file(odometryPathFile, currentTimeStamp);
                 
             }
             
@@ -191,7 +183,6 @@ int TrackerPatterns::Main (int argc, char **argv)
 
         }
 
-        odom_file.close();
         traj_file.close();
 
     }
@@ -204,21 +195,61 @@ int TrackerPatterns::Main (int argc, char **argv)
 }
 
 
-bool TrackerPatterns::check_odom_file(std::ifstream &odom_file,
-                                        const double currentTimeStamp) 
+bool TrackerPatterns::check_odom_file( const char *odometryPathFile,
+                                       const double currentTimeStamp) 
 {
+    // Opening odometry file
+    std::ifstream odom_file;
+    odom_file.open( odometryPathFile ); 
+    if ( odom_file.is_open() ) {
+        ROS_INFO("[tracker_patterns] Opening: %s",odometryPathFile);
+    }
+    else {
+        ROS_ERROR("[tracker_patterns] NOT OPEN: %s",odometryPathFile);
+        ROS_ERROR("[tracker_patterns] ERROR, Cannot open odometry file. ");
+        ROS_ERROR("[tracker_patterns] Heading_adjst and Distance_adjst without checking odom. ");
+        return true;
+    }
 
-//TODO: make it work...
-//TODO: Check values, currentTimeStamp, etc...!
-std::cout<< "[check_odom_file] " << currentTimeStamp << std::fixed << std::endl;
-    std::string line;
+    // Time Stamp separating integer part and decimal part 
     int currentTimeStampTrunc = currentTimeStamp;
+    double currentTimeStampDecim = currentTimeStamp-currentTimeStampTrunc;
+
+    // Time Stamp integer part to string 
+    std::stringstream buffer;
+    buffer << currentTimeStampTrunc;
+    std::string currentTimeStampTruncStr = buffer.str();
+
+    // Reading all the lines looking for the TimeStamp
+    std::string line;
     for(unsigned int curLine = 0; getline(odom_file, line); curLine++) {
-std::cout<<line<<"  "<<currentTimeStamp<<std::endl;
-        if (line.find( currentTimeStampTrunc ) != std::string::npos) {
-            std::cout << "found: " << currentTimeStampTrunc << "line: " << curLine << std::endl;
+
+        if (line.find( currentTimeStampTruncStr ) != std::string::npos) {
+
+            int dummy, tSs, x, y, theta;
+            std::string tSm;
+            // Reading columns
+            std::istringstream ss(line);
+            ss >> dummy >> dummy >> dummy >> tSs >> tSm >> dummy >> dummy >> dummy >> x 
+               >> y >> dummy >> theta >> dummy >> dummy;
+
+            // Processing Time Stamp milliseconds from string to double
+            tSm="0."+tSm;
+            double tSmDouble = std::atof(tSm.c_str());
+
+            // Checking period. If there is no robot movement in an interval of 0.5s
+            // then we have heading or distance adjustment 
+            if (tSmDouble >= currentTimeStampDecim and tSmDouble < currentTimeStampDecim +0.5) {
+                //TODO: Check odom values of all interval
+                //TODO: return true or false
+            }
+
+std::cout<< currentTimeStampTrunc<<":"<<currentTimeStampDecim << "  " << tSs <<":"<<tSm<< std::endl;
+
         }
     }
+
+    odom_file.close();
     
     
 }
