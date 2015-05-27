@@ -14,8 +14,8 @@ TrackerPatterns::TrackerPatterns (void)
 {
 
     /// Init publishers
-    heading_adj_pub = n.advertise<interaction_monitor::AnnotationVariable>("ELAN_heading_adj",10);
-    dist_adj_pub = n.advertise<interaction_monitor::AnnotationVariable>("ELAN_dist_adj",10);
+    heading_adj_pub = n.advertise<interaction_monitor::AnnotationVariable>("heading_adj",10);
+    dist_adj_pub = n.advertise<interaction_monitor::AnnotationVariable>("dist_adj",10);
 
 }
 
@@ -63,7 +63,7 @@ int TrackerPatterns::Main (int argc, char **argv)
         }
 
         bool endFile = false;
-        // This var currentTimeStamp will be updated by a subscriber in a future
+        // TODO future work: This var currentTimeStamp will be updated by a subscriber
         currentTimeStamp = 1274451145;
         double timeStamp = currentTimeStamp;   //TimeStamp read from the file
 
@@ -165,17 +165,45 @@ int TrackerPatterns::Main (int argc, char **argv)
              *  Checking in odometry file if the distance or angle adjustment is
              *  because of the robot movement
              */
-            bool odomValues = false;
+            bool robotMoving = false;
             if (distanceAdj or angleAdj) {
-                //TODO: CHECK odom  
-                //TODO: CHECK value returned  
-                odomValues = check_odom_file(odometryPathFile, currentTimeStamp);
-                
+                robotMoving = was_the_robot_moving(odometryPathFile, currentTimeStamp);
             }
             
-            //TODO: Publish 
+            // Filling publisher varables 
+            interaction_monitor::AnnotationVariable HeadPubVar;
+            interaction_monitor::AnnotationVariable DistPubVar;
+            if (robotMoving) {
+                // Publish no angleAdj and no distanceAdj
+                DistPubVar.tini=currentTimeStamp-1274451145;  //TODO future work
+                DistPubVar.tend=currentTimeStamp-1274451145;  //TODO future work
+                DistPubVar.value=0;
+                HeadPubVar.tini=currentTimeStamp-1274451145;  //TODO future work
+                HeadPubVar.tend=currentTimeStamp-1274451145;  //TODO future work
+                HeadPubVar.value=0;
+                 
+            }
+            if (distanceAdj and !robotMoving) {
+                // Fill distanceAdj var
+                DistPubVar.tini=currentTimeStamp-1274451145;  //TODO future work
+                DistPubVar.tend=currentTimeStamp-1274451145;  //TODO future work
+                DistPubVar.value=1;
+                
+            }
+            if (angleAdj and !robotMoving) {
+                // Fill angleAdj var
+                HeadPubVar.tini=currentTimeStamp-1274451145;  //TODO future work
+                HeadPubVar.tend=currentTimeStamp-1274451145;  //TODO future work
+                HeadPubVar.value=1;
+                 
+            }
 
-            // This var will be updated by a subscriber in a future
+            //Publish heading_adj and dist_adj topics 
+            dist_adj_pub.publish(DistPubVar);
+            heading_adj_pub.publish(HeadPubVar);
+
+
+            //TODO future work: This var will be updated by a subscriber in a future
             currentTimeStamp+=0.5;
     
             ros::spinOnce();
@@ -195,7 +223,15 @@ int TrackerPatterns::Main (int argc, char **argv)
 }
 
 
-bool TrackerPatterns::check_odom_file( const char *odometryPathFile,
+/**
+ *  Function to check in the odometry file if the heading or distance adjustament
+ *  have been produced due to the robot movement.
+ *
+ *  Input: path to odometry file
+ *         current TimeStamp
+ *  Output: boolean that return true in case that the robot was moving 
+ */
+bool TrackerPatterns::was_the_robot_moving( const char *odometryPathFile,
                                        const double currentTimeStamp) 
 {
     // Opening odometry file
@@ -208,49 +244,46 @@ bool TrackerPatterns::check_odom_file( const char *odometryPathFile,
         ROS_ERROR("[tracker_patterns] NOT OPEN: %s",odometryPathFile);
         ROS_ERROR("[tracker_patterns] ERROR, Cannot open odometry file. ");
         ROS_ERROR("[tracker_patterns] Heading_adjst and Distance_adjst without checking odom. ");
-        return true;
+        return false;
     }
 
-    // Time Stamp separating integer part and decimal part 
-    int currentTimeStampTrunc = currentTimeStamp;
-    double currentTimeStampDecim = currentTimeStamp-currentTimeStampTrunc;
-
-    // Time Stamp integer part to string 
-    std::stringstream buffer;
-    buffer << currentTimeStampTrunc;
-    std::string currentTimeStampTruncStr = buffer.str();
-
-    // Reading all the lines looking for the TimeStamp
     std::string line;
+    // Vars to store previous values
+    double x_ant=0; 
+    double y_ant=0; 
+    double theta_ant=0;
+
+    // Reading all the lines looking for the TimeStamp and checking odometry values
     for(unsigned int curLine = 0; getline(odom_file, line); curLine++) {
 
-        if (line.find( currentTimeStampTruncStr ) != std::string::npos) {
+        // Reading columns
+        double dummy, tSs, x, y, theta;
+        std::string tSm;
+        std::istringstream ss(line);
+        ss >> dummy >> dummy >> dummy >> tSs >> tSm >> dummy >> dummy >> dummy >> x 
+           >> y >> dummy >> theta >> dummy >> dummy;
 
-            int dummy, tSs, x, y, theta;
-            std::string tSm;
-            // Reading columns
-            std::istringstream ss(line);
-            ss >> dummy >> dummy >> dummy >> tSs >> tSm >> dummy >> dummy >> dummy >> x 
-               >> y >> dummy >> theta >> dummy >> dummy;
+        // Processing Time Stamp milliseconds from string to double
+        tSm="0."+tSm;
+        tSs = tSs + std::atof(tSm.c_str());
 
-            // Processing Time Stamp milliseconds from string to double
-            tSm="0."+tSm;
-            double tSmDouble = std::atof(tSm.c_str());
+        // Checking period. If there is no robot movement in an interval of 1s
+        // then we have heading or distance adjustment 
+        if (tSs >= currentTimeStamp -0.5 and tSs < currentTimeStamp +0.5) {
+            ROS_INFO("[tracker_patterns] currentTS:%f TS:%f", currentTimeStamp,tSs);
 
-            // Checking period. If there is no robot movement in an interval of 0.5s
-            // then we have heading or distance adjustment 
-            if (tSmDouble >= currentTimeStampDecim and tSmDouble < currentTimeStampDecim +0.5) {
-                //TODO: Check odom values of all interval
-                //TODO: return true or false
-            }
-
-std::cout<< currentTimeStampTrunc<<":"<<currentTimeStampDecim << "  " << tSs <<":"<<tSm<< std::endl;
-
+            if (x!=x_ant or y!=y_ant or theta!=theta_ant) return true;
         }
+
+        // Updating previous values
+        x_ant = x;
+        y_ant = y;
+        theta_ant = theta;
+        
     }
 
     odom_file.close();
-    
+    return false; 
     
 }
 

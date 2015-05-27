@@ -41,8 +41,7 @@ private:
     static const int MAX_ANGL_TH = 3.14159265358979/4;
 
     // Functions
-    bool check_odom_file(const char *odometryPathFile, 
-                                          const double currentTimeStamp);
+    bool was_the_robot_moving(const char *odometryPathFile, const double currentTimeStamp);
 
 
 
