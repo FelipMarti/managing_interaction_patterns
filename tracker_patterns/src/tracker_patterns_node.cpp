@@ -131,9 +131,7 @@ int TrackerPatterns::Main (int argc, char **argv)
 
                 // Filtering values 
                 double sumElemsD =std::accumulate(distanceFilter.begin(),distanceFilter.end(),0);
-                distancePrevious.push_back(sumElemsD/distanceFilter.size());
                 double sumElemsA =std::accumulate(angleFilter.begin(),angleFilter.end(),0);
-                anglePrevious.push_back(sumElemsA/angleFilter.size());
 
                 // Storing value
                 distancePrevious.push_back(sumElemsD/distanceFilter.size());
@@ -151,10 +149,10 @@ int TrackerPatterns::Main (int argc, char **argv)
                 // Checking ANGLE threshold
                 if (anglePrevious.size() > 3) {
                     anglePrevious.erase (anglePrevious.begin()); 
-                    // THRESHOLD
+                    // THRESHOLD +10 to add an offset
                     // TODO: CHECK THRESHOLD
-                    if ( abs (anglePrevious[2] - anglePrevious[1]) > MAX_ANGL_TH or
-                         abs (anglePrevious[2] - anglePrevious[0]) > MAX_ANGL_TH) {
+                    if ( abs ((anglePrevious[2]+10) - (anglePrevious[1]+10)) > MAX_ANGL_TH or
+                         abs ((anglePrevious[2]+10) - (anglePrevious[0]+10)) > MAX_ANGL_TH) {
                         angleAdj=true;
                     }
                 }
@@ -181,21 +179,30 @@ int TrackerPatterns::Main (int argc, char **argv)
                 HeadPubVar.tini=currentTimeStamp-1274451145;  //TODO future work
                 HeadPubVar.tend=currentTimeStamp-1274451145;  //TODO future work
                 HeadPubVar.value=0;
-                 
             }
             if (distanceAdj and !robotMoving) {
                 // Fill distanceAdj var
                 DistPubVar.tini=currentTimeStamp-1274451145;  //TODO future work
                 DistPubVar.tend=currentTimeStamp-1274451145;  //TODO future work
                 DistPubVar.value=1;
-                
+                // debug
+                int min,sec;
+                min=(currentTimeStamp-1274451145)/60;
+                sec=(int)(currentTimeStamp-1274451145)%60;
+                ROS_INFO("[tracker_patterns] Distance_Adjustment=1 %d:%d TS=%f"
+                            ,min,sec,currentTimeStamp);
             }
             if (angleAdj and !robotMoving) {
                 // Fill angleAdj var
                 HeadPubVar.tini=currentTimeStamp-1274451145;  //TODO future work
                 HeadPubVar.tend=currentTimeStamp-1274451145;  //TODO future work
                 HeadPubVar.value=1;
-                 
+                // debug
+                int min,sec;
+                min=(currentTimeStamp-1274451145)/60;
+                sec=(int)(currentTimeStamp-1274451145)%60;
+                ROS_INFO("[tracker_patterns] Heading_Adjustment=1 %d:%d TS=%f"
+                            ,min,sec,currentTimeStamp);
             }
 
             //Publish heading_adj and dist_adj topics 
@@ -270,8 +277,6 @@ bool TrackerPatterns::was_the_robot_moving( const char *odometryPathFile,
         // Checking period. If there is no robot movement in an interval of 1s
         // then we have heading or distance adjustment 
         if (tSs >= currentTimeStamp -0.5 and tSs < currentTimeStamp +0.5) {
-            ROS_INFO("[tracker_patterns] currentTS:%f TS:%f", currentTimeStamp,tSs);
-
             if (x!=x_ant or y!=y_ant or theta!=theta_ant) return true;
         }
 
@@ -303,7 +308,6 @@ int main(int argc, char **argv)
     return foo.Main(argc, argv);
 
 }
-
 
 
 
