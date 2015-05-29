@@ -149,7 +149,7 @@ int TrackerPatterns::Main (int argc, char **argv)
                 // Checking ANGLE threshold
                 if (anglePrevious.size() > 3) {
                     anglePrevious.erase (anglePrevious.begin()); 
-                    // THRESHOLD +10 to add an offset
+                    // THRESHOLD +10 to add an offset and to calculate the threshold easily
                     // TODO: CHECK THRESHOLD
                     if ( abs ((anglePrevious[2]+10) - (anglePrevious[1]+10)) > MAX_ANGL_TH or
                          abs ((anglePrevious[2]+10) - (anglePrevious[0]+10)) > MAX_ANGL_TH) {

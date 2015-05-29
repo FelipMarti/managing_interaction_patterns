@@ -37,8 +37,8 @@ private:
     
     double currentTimeStamp;
 
-    static const int MAX_DIST_TH = 200;
-    static const int MAX_ANGL_TH = 3.14159265358979/4;
+    static const int MAX_DIST_TH = 500; // in mm
+    static const int MAX_ANGL_TH = 3.14159265358979/4;  // in rad
 
     // Functions
     bool was_the_robot_moving(const char *odometryPathFile, const double currentTimeStamp);
