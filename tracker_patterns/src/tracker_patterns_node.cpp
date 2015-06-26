@@ -64,7 +64,7 @@ int TrackerPatterns::Main (int argc, char **argv)
 
         bool endFile = false;
         // TODO future work: This var currentTimeStamp will be updated by a subscriber
-        currentTimeStamp = 1274451145;
+        currentTimeStamp = INIT_CTS;
         double timeStamp = currentTimeStamp;   //TimeStamp read from the file
 
         /**
@@ -173,34 +173,34 @@ int TrackerPatterns::Main (int argc, char **argv)
             interaction_monitor::AnnotationVariable DistPubVar;
             if (robotMoving) {
                 // Publish no angleAdj and no distanceAdj
-                DistPubVar.tini=currentTimeStamp-1274451145;  //TODO future work
-                DistPubVar.tend=currentTimeStamp-1274451145;  //TODO future work
+                DistPubVar.tini=currentTimeStamp-INIT_CTS;  //TODO future work
+                DistPubVar.tend=currentTimeStamp-INIT_CTS;  //TODO future work
                 DistPubVar.value=0;
-                HeadPubVar.tini=currentTimeStamp-1274451145;  //TODO future work
-                HeadPubVar.tend=currentTimeStamp-1274451145;  //TODO future work
+                HeadPubVar.tini=currentTimeStamp-INIT_CTS;  //TODO future work
+                HeadPubVar.tend=currentTimeStamp-INIT_CTS;  //TODO future work
                 HeadPubVar.value=0;
             }
             if (distanceAdj and !robotMoving) {
                 // Fill distanceAdj var
-                DistPubVar.tini=currentTimeStamp-1274451145;  //TODO future work
-                DistPubVar.tend=currentTimeStamp-1274451145;  //TODO future work
+                DistPubVar.tini=currentTimeStamp-INIT_CTS;  //TODO future work
+                DistPubVar.tend=currentTimeStamp-INIT_CTS;  //TODO future work
                 DistPubVar.value=1;
                 // debug
                 int min,sec;
-                min=(currentTimeStamp-1274451145)/60;
-                sec=(int)(currentTimeStamp-1274451145)%60;
+                min=(currentTimeStamp-INIT_CTS)/60;
+                sec=(int)(currentTimeStamp-INIT_CTS)%60;
                 ROS_INFO("[tracker_patterns] Distance_Adjustment=1 %d:%d TS=%f"
                             ,min,sec,currentTimeStamp);
             }
             if (angleAdj and !robotMoving) {
                 // Fill angleAdj var
-                HeadPubVar.tini=currentTimeStamp-1274451145;  //TODO future work
-                HeadPubVar.tend=currentTimeStamp-1274451145;  //TODO future work
+                HeadPubVar.tini=currentTimeStamp-INIT_CTS;  //TODO future work
+                HeadPubVar.tend=currentTimeStamp-INIT_CTS;  //TODO future work
                 HeadPubVar.value=1;
                 // debug
                 int min,sec;
-                min=(currentTimeStamp-1274451145)/60;
-                sec=(int)(currentTimeStamp-1274451145)%60;
+                min=(currentTimeStamp-INIT_CTS)/60;
+                sec=(int)(currentTimeStamp-INIT_CTS)%60;
                 ROS_INFO("[tracker_patterns] Heading_Adjustment=1 %d:%d TS=%f"
                             ,min,sec,currentTimeStamp);
             }
